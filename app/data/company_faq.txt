@@ -1,0 +1,7 @@
+NEXUS ENTERPRISE SOLUTIONS - INTERNAL POLICY ARCHIVE
+
+1. SERVICE REFUND PROTOCOL: Customers are fully eligible for a complete subscription refund within 14 days of original deployment. Absolutely no manual exceptions or overrides are granted after the 14-day threshold. Refund requests must be logged via billing@nexusops.io.
+
+2. CORPORATE DATA PRIVACY: All tenant client data ingested through our API gateways or internal agent pipelines is heavily encrypted in transit and at rest using AES-256 protocols. Operational conversation telemetry logs are completely ephemeral and scrubbed from processing nodes.
+
+3. ARCHITECTURE MAINTENANCE SCHEDULE: Infrastructure deployments, API version bumps, and system maintenance windows occur weekly on Sundays at 02:00 AM UTC. Total service downtime during these deployment windows never exceeds 5 minutes.

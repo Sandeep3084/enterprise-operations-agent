@@ -1,0 +1,16 @@
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# Secrets and Configurations
+.env
+
+# Python caching
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local database files
+.chroma/
