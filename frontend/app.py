@@ -29,7 +29,7 @@ if prompt := st.chat_input("Ask a question or issue a command..."):
     with st.chat_message("assistant"):
         with st.spinner("Agent workflow executing..."):
             try:
-                api_url = "https://enterprise-ops-backend.onrender.com/chat"
+                api_url = "https://enterprise-operations-agent.onrender.com/chat"
 
                 payload = {"messages": st.session_state.messages}
                 response = requests.post(api_url, json=payload)
