@@ -3,11 +3,11 @@ import requests
 
 st.set_page_config(
     page_title="Enterprise Operations Agent",
-    page_icon="💼",
+    page_icon="",
     layout="centered"
 )
 
-st.title("💼 Autonomous Operations Engine")
+st.title("Autonomous Operations Engine")
 st.caption("A multi-agent architecture featuring dynamic routing, semantic local RAG, and live tool execution.")
 
 if "messages" not in st.session_state:
@@ -29,9 +29,8 @@ if prompt := st.chat_input("Ask a question or issue a command..."):
     with st.chat_message("assistant"):
         with st.spinner("Agent workflow executing..."):
             try:
-                # Local test URL (switch this to your Render URL when deploying live)
-                api_url = "http://127.0.0.1:8000/chat"
-                
+                api_url = "https://enterprise-ops-backend.onrender.com/chat"
+
                 payload = {"messages": st.session_state.messages}
                 response = requests.post(api_url, json=payload)
                 

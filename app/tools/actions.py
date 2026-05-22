@@ -6,8 +6,7 @@ def check_order_status(order_id: str) -> str:
     Use this tool to check the current status of an e-commerce order.
     This tool requires a valid order_id string format starting with 'ORD-'.
     """
-    # In a real app, this function would send a request to Shopify's or WooCommerce's API.
-    # For our hackathon prototype, we will simulate a database query.
+    # Just a prototype, so simulating a database query rather than calling an API.
     print(f"\n[TOOL LOG] Running check_order_status for: {order_id}...")
     
     mock_shopify_db = {
@@ -34,7 +33,7 @@ def qualify_lead(email: str, company_size: int) -> str:
         return f"Lead saved to CRM. Standard onboarding email sent to {email}."
 
 
-# Put all your available tools into a clean list that we can pass to our agents later.
+# Put all the available tools into a clean list that it can pass to the agents later.
 agent_tools = [check_order_status, qualify_lead]
 
 from app.db.retriever import get_retriever
@@ -56,15 +55,13 @@ def query_company_knowledge(query: str) -> str:
     except Exception as e:
         return f"Failed to retrieve company data records: {str(e)}"
 
-# UPDATE the main tool exports list to include our new RAG search tool
+# Update the main tool exports list to include the RAG search tool
 agent_tools = [check_order_status, qualify_lead, query_company_knowledge]
 
 import requests
 from bs4 import BeautifulSoup
 from langchain_core.tools import tool
 from app.db.retriever import get_retriever
-
-# ... [Keep your existing check_order_status, qualify_lead, and query_company_knowledge tools here] ...
 
 @tool
 def scrape_company_website(url: str) -> str:
@@ -74,17 +71,14 @@ def scrape_company_website(url: str) -> str:
     """
     print(f"\n[TOOL LOG] Initiating live web crawl for: {url}...")
     try:
-        # We use a User-Agent header to mimic a real browser, preventing basic bot-blockers
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
         }
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
 
-        # Parse the HTML content
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        # Strip out all the invisible structural code (scripts and styles)
         for script in soup(["script", "style"]):
             script.extract()
 
@@ -94,12 +88,12 @@ def scrape_company_website(url: str) -> str:
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
         cleaned_text = '\n'.join(chunk for chunk in chunks if chunk)
         
-        # We truncate the output to 1500 characters to protect the LLM's context window 
+        # truncate the output to 1500 characters to protect the llm's context window 
         # while still capturing the homepage hero text and about sections.
         return f"Successfully scraped {url}. Website content:\n{cleaned_text[:1500]}..."
         
     except Exception as e:
         return f"Failed to scrape {url}. Error: {str(e)}"
 
-# UPDATE your exports list at the very bottom to include the new tool!
+# update exports list at the very bottom to include the new tool :-)
 agent_tools = [check_order_status, qualify_lead, query_company_knowledge, scrape_company_website]

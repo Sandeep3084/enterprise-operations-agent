@@ -4,11 +4,11 @@ from app.config.llm import get_llm
 from app.tools.actions import agent_tools
 from app.agents.state import AgentState
 
-# 1. Initialize our customizable LLM and bind our tools to it
+# 1. Initialize (customizable LLM) and bind tools to it
 llm = get_llm()
 llm_with_tools = llm.bind_tools(agent_tools)
 
-# 2. Define our core Core Router Node
+# 2. Define core router node
 def core_router_node(state: AgentState):
     """
     This node takes the current conversation state, passes it to the LLM,
@@ -37,14 +37,14 @@ def route_decision(state: AgentState):
 # 4. Construct the Graph Workflow
 workflow = StateGraph(AgentState)
 
-# Add our core nodes
+# Add core nodes
 workflow.add_node("router", core_router_node)
 workflow.add_node("execute_tools", ToolNode(agent_tools)) # Prebuilt node that automatically runs our Python tools
 
 # Establish connections (edges)
 workflow.add_edge(START, "router")
 
-# Add conditional routing out of our router node
+# Add conditional routing out of the router node
 workflow.add_conditional_edges(
     "router",
     route_decision,
@@ -57,5 +57,5 @@ workflow.add_conditional_edges(
 # Connect the tools node back to the router so the model can inspect the tool's output
 workflow.add_edge("execute_tools", "router")
 
-# Compile our graph into an executable application
+# Compile thegraph into an executable application
 agent_app = workflow.compile()

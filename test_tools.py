@@ -5,10 +5,10 @@ def verify_tool_binding():
     print("Initializing LLM...")
     llm = get_llm()
     
-    # Bind our tools to the language model
+    # Bind the tools to the language model
     llm_with_tools = llm.bind_tools(agent_tools)
     
-    # Let's test if the model can identify a customer who wants to buy something
+    # Test for if the model can identify a customer who wants to buy something
     test_prompt = "Hi, my name is John. I represent a company of 120 employees and we want to purchase your enterprise tier. Contact me at john@enterprise.com"
     
     print(f"\nSending prompt to model: '{test_prompt}'")

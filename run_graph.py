@@ -4,7 +4,7 @@ from langchain_core.messages import HumanMessage
 def test_full_graph_loop():
     print("Starting LangGraph multi-agent simulation...")
     
-    # Simulate a user message
+    # Simulate user message
     initial_state = {
         "messages": [HumanMessage(content="Hi, please check the status of my order ORD-123.")]
     }
