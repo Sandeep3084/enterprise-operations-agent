@@ -1,61 +1,49 @@
+from langchain_core.messages import SystemMessage
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
+
 from app.config.llm import get_llm
 from app.tools.actions import agent_tools
 from app.agents.state import AgentState
 
-# 1. Initialize (customizable LLM) and bind tools to it
+# Initialize model and bind tools
 llm = get_llm()
 llm_with_tools = llm.bind_tools(agent_tools)
 
-# 2. Define core router node
-def core_router_node(state: AgentState):
-    """
-    This node takes the current conversation state, passes it to the LLM,
-    and returns the LLM's response (whether it's plain text or a tool call).
-    """
-    print("\n--- [NODE] Core Router Processing State ---")
+# Explicit prompt directing model to prioritize tool usage for policies
+SYSTEM_PROMPT = """
+You are the primary automated operations agent for Nexus Enterprise Solutions. 
+
+CRITICAL INSTRUCTION: You MUST use the `query_company_knowledge` tool to answer ANY questions regarding company policies, refunds, or guidelines. 
+Do NOT refuse to answer policy questions. Do NOT tell the user to contact a representative. Always fetch the policy from your tools and summarize it for the user.
+"""
+
+# Core reasoning node that injects the system instructions before invocation
+def call_model(state: AgentState):
     messages = state["messages"]
-    response = llm_with_tools.invoke(messages)
+    modified_messages = [SystemMessage(content=SYSTEM_PROMPT)] + messages
+    response = llm_with_tools.invoke(modified_messages)
     return {"messages": [response]}
 
-# 3. Define the routing logic condition
-def route_decision(state: AgentState):
-    """
-    This conditional function checks if the last message from the LLM
-    wanted to trigger a tool call. If yes, it routes to our tools. If no, it ends.
-    """
-    last_message = state["messages"][-1]
-    
-    if last_message.tool_calls:
-        print(f" -> [ROUTER] Directing to Tool Execution: {last_message.tool_calls[0]['name']}")
-        return "execute_tools"
-        
-    print(" -> [ROUTER] Final text response ready. Ending graph execution.")
+# Execution node for running python functions triggered by the agent
+tool_node = ToolNode(agent_tools)
+
+# Evaluates whether the agent requires a tool or is ready to reply
+def should_continue(state: AgentState) -> str:
+    messages = state["messages"]
+    last_message = messages[-1]
+    if hasattr(last_message, "tool_calls") and last_message.tool_calls:
+        return "tools"
     return END
 
-# 4. Construct the Graph Workflow
+# Graph compilation and layout architecture definition
 workflow = StateGraph(AgentState)
 
-# Add core nodes
-workflow.add_node("router", core_router_node)
-workflow.add_node("execute_tools", ToolNode(agent_tools)) # Prebuilt node that automatically runs our Python tools
+workflow.add_node("agent", call_model)
+workflow.add_node("tools", tool_node)
 
-# Establish connections (edges)
-workflow.add_edge(START, "router")
+workflow.add_edge(START, "agent")
+workflow.add_conditional_edges("agent", should_continue, {"tools": "tools", END: END})
+workflow.add_edge("tools", "agent")
 
-# Add conditional routing out of the router node
-workflow.add_conditional_edges(
-    "router",
-    route_decision,
-    {
-        "execute_tools": "execute_tools",
-        "__end__": END
-    }
-)
-
-# Connect the tools node back to the router so the model can inspect the tool's output
-workflow.add_edge("execute_tools", "router")
-
-# Compile thegraph into an executable application
 agent_app = workflow.compile()
