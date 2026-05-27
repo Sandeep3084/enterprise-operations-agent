@@ -4,8 +4,9 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_ollama import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
 
-# Define path for persisting our vector database locally
-CHROMA_DIR = "./chroma_db"
+# Define path for persisting the vector db locally
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+CHROMA_DIR = os.path.join(BASE_DIR, "chroma_db")
 
 def init_knowledge_base():
     """
